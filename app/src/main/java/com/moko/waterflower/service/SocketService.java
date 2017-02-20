@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils;
 
+import com.elvishew.xlog.LogUtils;
 import com.moko.waterflower.base.BaseHandler;
 import com.moko.waterflower.entity.Device;
 import com.moko.waterflower.module.LogModule;
@@ -39,6 +40,7 @@ public class SocketService extends Service {
     public static String mMainDeviceId;
 
     public static class InHandle extends BaseHandler<SocketService> {
+        HashMap<String, String> hm = new HashMap<>();
 
         public InHandle(SocketService service) {
             super(service);
@@ -54,7 +56,9 @@ public class SocketService extends Service {
                     String mess = MessModule.transformReceivedMess(s);
                     String header = mess.substring(20, 24);
                     if (MESS_HEADER_LOGIN.equals(header)) {
-                        if (!TextUtils.isEmpty(mMainDeviceId)) {
+                        if (hm.get(header) == null) {
+                            hm.put(header, mess);
+                        } else {
                             return;
                         }
                         // 登录
@@ -67,6 +71,11 @@ public class SocketService extends Service {
                         service.sendBroadcast(intent);
                     }
                     if (MESS_HEADER_DEVICES.equals(header)) {
+                        if (hm.get(header) == null) {
+                            hm.put(header, mess);
+                        } else {
+                            return;
+                        }
                         try {
                             HashMap<String, Device> map = new HashMap<>();
                             // 上报数据
@@ -93,7 +102,7 @@ public class SocketService extends Service {
                                     device.light = Integer.toString(Integer.parseInt(mess.substring(i + 22, i + 26), 16));
                                 }
                                 if ("04".equals(mess.substring(i + 8, i + 10))) {
-                                    device.power = Float.toString(Integer.parseInt(mess.substring(i + 22, i + 26), 16) / 100);
+                                    device.power = Double.toString(Integer.parseInt(mess.substring(i + 22, i + 26), 16) * 0.01);
                                 }
                                 if ("05".equals(mess.substring(i + 8, i + 10))) {
                                     device.water = Integer.toString(Integer.parseInt(mess.substring(i + 22, i + 26), 16));
@@ -139,6 +148,7 @@ public class SocketService extends Service {
      * @Description 组装发送的数据
      */
     public String renderSendMess(String mess) {
+        LogModule.i("要拼装的数据:" + mess);
         StringBuilder sb = new StringBuilder();
         sb.append(mMainDeviceId);
         sb.append(MessModule.getSerialNumber());
@@ -226,7 +236,6 @@ public class SocketService extends Service {
         mSocketThread.isRun = false;
         mSocketThread.close();
         mSocketThread = null;
-        mMainDeviceId = null;
         MessModule.resetSerialNumber();
         LogModule.i("Socket已终止");
     }
