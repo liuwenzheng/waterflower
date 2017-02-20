@@ -50,10 +50,10 @@ public class DeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         holder.tvDeviceId.setText(device.id);
         holder.tvDeviceTime.setText(device.time);
         holder.tvDevicePower.setText(String.format("%sV", device.power));
-        holder.tvEnvHumidity.setText(String.format("环境湿度：%s%", device.envHumidity));
-        holder.tvSoilHumidity.setText(String.format("土壤湿度：%s%", device.soilHumidity));
+        holder.tvEnvHumidity.setText(String.format("环境湿度：%s", device.envHumidity + "%"));
+        holder.tvSoilHumidity.setText(String.format("土壤湿度：%s", device.soilHumidity + "%"));
         holder.tvEnvTemp.setText(String.format("环境温度：%s℃", device.envTemp));
-        holder.tvWater.setText(String.format("水量：%s%", device.water));
+        holder.tvWater.setText(String.format("水量：%s", device.water + "%"));
         holder.tvDeviceLight.setText(String.format(" 光照：%slx", device.light));
         holder.btnWaterCondition.setOnClickListener(new View.OnClickListener() {
             @Override

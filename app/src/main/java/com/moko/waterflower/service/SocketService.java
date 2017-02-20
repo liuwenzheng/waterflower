@@ -21,11 +21,14 @@ public class SocketService extends Service {
     public static final String EXTRA_KEY_SEND_CODE = "send_code";
     public static final String EXTRA_KEY_CONN_MESS = "conn_mess";
     public static final String EXTRA_KEY_GET_DEVICES = "data_devices";
+    public static final String EXTRA_KEY_DEVICE_ID = "data_device_id";
     public static final String MESS_HEADER_LOGIN = "0002";
     public static final String MESS_HEADER_DEVICES = "0003";
+    public static final String MESS_HEADER_ACK = "0001";
 
 
     private Handler mInHandle;
+
     private Handler mOutHandle;
 
     public SocketThread getSocketThread() {
@@ -46,15 +49,22 @@ public class SocketService extends Service {
             if (msg.obj != null) {
                 String s = msg.obj.toString();
                 if (s.trim().length() > 0) {
-                    LogModule.i("mhandler接收到obj=" + s);
-                    LogModule.i("开始更新UI");
+                    // LogModule.i("mhandler接收到obj=" + s);
+                    // LogModule.i("开始更新UI");
                     String mess = MessModule.transformReceivedMess(s);
                     String header = mess.substring(20, 24);
                     if (MESS_HEADER_LOGIN.equals(header)) {
+                        if (!TextUtils.isEmpty(mMainDeviceId)) {
+                            return;
+                        }
                         // 登录
                         mMainDeviceId = MessModule.getMainDeviceId(mess);
                         String resp = service.renderSendMess("8002" + MessModule.getBcdTime() + "0001");
                         service.getSocketThread().send(resp);
+                        Intent intent = new Intent(ACTION_CONN_STATE);
+                        intent.putExtra(EXTRA_KEY_DEVICE_ID, mMainDeviceId);
+                        intent.putExtra(EXTRA_KEY_SEND_CODE, 4);
+                        service.sendBroadcast(intent);
                     }
                     if (MESS_HEADER_DEVICES.equals(header)) {
                         try {
@@ -97,10 +107,22 @@ public class SocketService extends Service {
                             intent.putExtra(EXTRA_KEY_GET_DEVICES, map);
                             service.sendBroadcast(intent);
                             // 应答
-                            service.getSocketThread().send("8001" + service.renderSendMess(header) + "00");
+                            service.getSocketThread().send(service.renderSendMess("8001" + header + "00"));
                         } catch (Exception e) {
                             e.printStackTrace();
-                            service.getSocketThread().send("8001" + service.renderSendMess(header) + "01");
+                            service.getSocketThread().send(service.renderSendMess("8001" + header + "01"));
+                        }
+                    }
+                    if (MESS_HEADER_ACK.equals(header)) {
+                        String result = mess.substring(28, 30);
+                        Intent intent = new Intent(ACTION_CONN_STATE);
+                        if ("00".equals(result)) {
+                            intent.putExtra(EXTRA_KEY_SEND_CODE, 0);
+                            service.sendBroadcast(intent);
+                        }
+                        if ("01".equals(result)) {
+                            intent.putExtra(EXTRA_KEY_SEND_CODE, 1);
+                            service.sendBroadcast(intent);
                         }
                     }
 
@@ -138,19 +160,21 @@ public class SocketService extends Service {
         protected void handleMessage(SocketService service, Message msg) {
             Intent intent = new Intent(ACTION_CONN_STATE);
             switch (msg.what) {
-                case 0:
-                    intent.putExtra(EXTRA_KEY_SEND_CODE, 0);
-                    break;
-                case 1:
-                    intent.putExtra(EXTRA_KEY_SEND_CODE, 1);
-                    break;
                 case 2:
                     intent.putExtra(EXTRA_KEY_SEND_CODE, 2);
+                    intent.putExtra(EXTRA_KEY_CONN_MESS, (String) msg.obj);
+                    break;
+                case 3:
+                    intent.putExtra(EXTRA_KEY_SEND_CODE, 3);
                     intent.putExtra(EXTRA_KEY_CONN_MESS, (String) msg.obj);
                     break;
             }
             service.sendBroadcast(intent);
         }
+    }
+
+    public void reConn() {
+        mSocketThread.conn();
     }
 
     public SocketService() {
@@ -202,6 +226,7 @@ public class SocketService extends Service {
         mSocketThread.isRun = false;
         mSocketThread.close();
         mSocketThread = null;
+        mMainDeviceId = null;
         MessModule.resetSerialNumber();
         LogModule.i("Socket已终止");
     }

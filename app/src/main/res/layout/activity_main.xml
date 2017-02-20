@@ -15,7 +15,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:text="ID:123456789"
+            android:text=""
             android:textSize="20sp" />
 
         <TextView
@@ -50,13 +50,28 @@
             android:textSize="20sp" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_water_all"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="12dp"
-        android:text="全部浇水"
-        android:textSize="20sp" />
+        android:padding="12dp">
+
+        <Button
+            android:id="@+id/btn_water_all"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:text="全部浇水"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/btn_reconn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_weight="1.0"
+            android:text="重新连接"
+            android:textSize="20sp" />
+    </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_list"

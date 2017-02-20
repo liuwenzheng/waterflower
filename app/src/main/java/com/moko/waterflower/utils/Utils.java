@@ -17,10 +17,10 @@ public class Utils {
      * @Title:bytes2HexString
      * @Description:字节数组转16进制字符串
      */
-    public static String bytes2HexString(byte[] b) {
+    public static String bytes2HexString(byte[] b,int len) {
         StringBuffer result = new StringBuffer();
         String hex;
-        for (int i = 0; i < b.length; i++) {
+        for (int i = 0; i < len; i++) {
             hex = Integer.toHexString(b[i] & 0xFF);
             if (hex.length() == 1) {
                 hex = '0' + hex;

@@ -46,6 +46,7 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
     TextView tvMainDeviceState;
     @Bind(R.id.rv_list)
     RecyclerView rvList;
+
     private SocketService mBtService;
     private DeviceAdapter mAdapter;
     private List<Device> mDevices;
@@ -110,13 +111,20 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
                 if (SocketService.ACTION_CONN_STATE.equals(intent.getAction())) {
                     int code = intent.getIntExtra(SocketService.EXTRA_KEY_SEND_CODE, -1);
                     if (code == 0) {
-                        ToastUtils.showToast(MainActivity.this, "发送成功");
+                        ToastUtils.showToast(MainActivity.this, "设备接收命令成功");
                     }
                     if (code == 1) {
-                        ToastUtils.showToast(MainActivity.this, "发送失败");
+                        ToastUtils.showToast(MainActivity.this, "设备接收命令失败");
                     }
                     if (code == 2) {
                         tvMainDeviceState.setText(intent.getStringExtra(SocketService.EXTRA_KEY_CONN_MESS));
+                    }
+                    if (code == 3) {
+                        ToastUtils.showToast(MainActivity.this, intent.getStringExtra(SocketService.EXTRA_KEY_CONN_MESS));
+                    }
+                    if (code == 4) {
+                        tvMainDeviceId.setText("ID:" + intent.getStringExtra(SocketService.EXTRA_KEY_DEVICE_ID));
+                        ToastUtils.showToast(MainActivity.this, intent.getStringExtra(SocketService.EXTRA_KEY_CONN_MESS));
                     }
                 }
                 if (SocketService.ACTION_GET_DATA.equals(intent.getAction())) {
@@ -150,7 +158,7 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
         super.onDestroy();
     }
 
-    @OnClick({R.id.btn_router_setting, R.id.btn_cloud_platform_setting, R.id.btn_water_all})
+    @OnClick({R.id.btn_router_setting, R.id.btn_cloud_platform_setting, R.id.btn_water_all, R.id.btn_reconn})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_router_setting:
@@ -164,6 +172,9 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
                 }
                 break;
             case R.id.btn_water_all:
+                break;
+            case R.id.btn_reconn:
+                mBtService.reConn();
                 break;
         }
     }
@@ -190,4 +201,10 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
         PVMPopupWindow popupWindow = new PVMPopupWindow(this);
         popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.TOP, 0, 0);
     }
+
+
+    public SocketService getBtService() {
+        return mBtService;
+    }
+
 }
