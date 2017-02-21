@@ -10,6 +10,7 @@
         android:id="@+id/tv_close"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
         android:drawableRight="@drawable/close"
         android:gravity="center"
         android:text="浇水条件设置"
@@ -34,6 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_weight="1.0"
+            android:inputType="number"
             android:textSize="20sp" />
     </LinearLayout>
 
@@ -56,6 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_weight="1.0"
+            android:inputType="number"
             android:textSize="20sp" />
     </LinearLayout>
 

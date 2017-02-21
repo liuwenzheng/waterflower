@@ -10,6 +10,7 @@
         android:id="@+id/tv_close"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
         android:drawableRight="@drawable/close"
         android:gravity="center"
         android:text="定时浇水设置"
@@ -31,9 +32,17 @@
         <EditText
             android:id="@+id/et_timing"
             android:layout_width="0dp"
+            android:inputType="number"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_weight="1.0"
+            android:textSize="20sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="min"
             android:textSize="20sp" />
     </LinearLayout>
 
@@ -53,9 +62,17 @@
         <EditText
             android:id="@+id/et_duration"
             android:layout_width="0dp"
+            android:inputType="number"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_weight="1.0"
+            android:textSize="20sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="s"
             android:textSize="20sp" />
     </LinearLayout>
 

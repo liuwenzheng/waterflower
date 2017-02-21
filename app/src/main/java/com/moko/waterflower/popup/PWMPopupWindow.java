@@ -22,25 +22,26 @@ import butterknife.OnClick;
  * @Description
  */
 
-public class CloudPlatformPopupWindow extends PopupWindow {
+public class PWMPopupWindow extends PopupWindow {
 
 
-    @Bind(R.id.et_ip)
-    EditText etIp;
-    @Bind(R.id.et_port)
-    EditText etPort;
+    @Bind(R.id.et_pwm)
+    EditText etPwm;
+    @Bind(R.id.et_duration)
+    EditText etDuration;
+
+    private String mId;
     private MainActivity mMainActivity;
 
-    public CloudPlatformPopupWindow(MainActivity activity) {
-        this(activity, "", "");
+    public PWMPopupWindow(MainActivity activity) {
+        this(activity, "");
     }
 
-    public CloudPlatformPopupWindow(MainActivity activity, String ip, String port) {
+    public PWMPopupWindow(MainActivity activity, String id) {
         mMainActivity = activity;
-        View layout = View.inflate(activity, R.layout.popup_cloud_platform, null);
+        mId = id;
+        View layout = View.inflate(activity, R.layout.popup_water_pwm, null);
         ButterKnife.bind(this, layout);
-        etIp.setText(ip);
-        etPort.setText(port);
         setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
         setHeight(LinearLayout.LayoutParams.MATCH_PARENT);
         setFocusable(true);
@@ -62,20 +63,31 @@ public class CloudPlatformPopupWindow extends PopupWindow {
                 break;
             case R.id.btn_save:
                 // 保存
-                if (TextUtils.isEmpty(etIp.getText().toString())) {
-                    ToastUtils.showToast(mMainActivity, "请填写IP");
+                if (TextUtils.isEmpty(etPwm.getText().toString())) {
+                    ToastUtils.showToast(mMainActivity, "请填写PWM占比");
                     return;
                 }
-                if (TextUtils.isEmpty(etPort.getText().toString())) {
-                    ToastUtils.showToast(mMainActivity, "请填写端口号");
+                if (TextUtils.isEmpty(etDuration.getText().toString())) {
+                    ToastUtils.showToast(mMainActivity, "请填写高电压时间");
+                    return;
+                }
+                int pwm = Integer.valueOf(etPwm.getText().toString());
+                if (pwm < 0 || pwm > 100) {
+                    ToastUtils.showToast(mMainActivity, "PWM占比范围在0~100");
+                    return;
+                }
+                int duration = Integer.valueOf(etDuration.getText().toString());
+                if (duration < 0 || duration > 10) {
+                    ToastUtils.showToast(mMainActivity, "高电压时间范围在0~10");
                     return;
                 }
                 StringBuilder sb = new StringBuilder();
-                sb.append("8009");
-                String ip = Utils.string2HexString(etIp.getText().toString());
-                sb.append(Utils.intToHexString(ip.length() / 2, 1));
-                sb.append(ip);
-                sb.append(Utils.intToHexString(Integer.valueOf(etPort.getText().toString()), 2));
+                sb.append("8008");
+                sb.append(mId);
+                String strPwm = Utils.intToHexString(pwm, 1);
+                String strDuration = Utils.intToHexString(duration * 2, 1);
+                sb.append(strPwm);
+                sb.append(strDuration);
                 mMainActivity.getBtService().getSocketThread().send(
                         mMainActivity.getBtService().renderSendMess(sb.toString()));
                 dismiss();

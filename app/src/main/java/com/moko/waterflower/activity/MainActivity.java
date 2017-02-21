@@ -2,6 +2,7 @@ package com.moko.waterflower.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -18,6 +20,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.moko.waterflower.R;
@@ -25,10 +28,11 @@ import com.moko.waterflower.adapter.DeviceAdapter;
 import com.moko.waterflower.entity.Device;
 import com.moko.waterflower.popup.CloudPlatformPopupWindow;
 import com.moko.waterflower.popup.ConditionPopupWindow;
-import com.moko.waterflower.popup.PVMPopupWindow;
+import com.moko.waterflower.popup.PWMPopupWindow;
 import com.moko.waterflower.popup.RouterPopupWindow;
 import com.moko.waterflower.popup.TimingPopupWindow;
 import com.moko.waterflower.service.SocketService;
+import com.moko.waterflower.utils.PreferencesUtil;
 import com.moko.waterflower.utils.ToastUtils;
 
 import java.util.ArrayList;
@@ -46,6 +50,14 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
     TextView tvMainDeviceState;
     @Bind(R.id.rv_list)
     RecyclerView rvList;
+    @Bind(R.id.btn_router_setting)
+    Button btnRouterSetting;
+    @Bind(R.id.btn_cloud_platform_setting)
+    Button btnCloudPlatformSetting;
+    @Bind(R.id.btn_water_all)
+    Button btnWaterAll;
+    @Bind(R.id.btn_reconn)
+    Button btnReconn;
 
     private SocketService mBtService;
     private DeviceAdapter mAdapter;
@@ -53,6 +65,7 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
     private RouterPopupWindow mRouterPopupWindow;
     private CloudPlatformPopupWindow mCloudPlatformPopupWindow;
     private static final int PERMISSION_REQUEST_CODE = 1;
+    private ProgressDialog mDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,8 +95,10 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
         mDevices = new ArrayList<>();
         mAdapter = new DeviceAdapter(this, mDevices, this);
         rvList.setAdapter(mAdapter);
-        mRouterPopupWindow = new RouterPopupWindow(this);
-        mCloudPlatformPopupWindow = new CloudPlatformPopupWindow(this);
+        btnRouterSetting.setEnabled(false);
+        btnCloudPlatformSetting.setEnabled(false);
+        btnWaterAll.setEnabled(false);
+        btnReconn.setEnabled(false);
     }
 
     @Override
@@ -117,20 +132,55 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
                         ToastUtils.showToast(MainActivity.this, "设备接收命令失败");
                     }
                     if (code == 2) {
-                        tvMainDeviceState.setText(intent.getStringExtra(SocketService.EXTRA_KEY_CONN_MESS));
+                        String conn = intent.getStringExtra(SocketService.EXTRA_KEY_CONN_MESS);
+                        if ("连接成功".equals(conn)) {
+                            if (mDialog == null) {
+                                mDialog = new ProgressDialog(MainActivity.this);
+                                mDialog.setCancelable(false);
+                                mDialog.setMessage("接收登录命令中...");
+                                mDialog.show();
+                            }
+                        }
+                        tvMainDeviceState.setText(conn);
+                        if ("连接失败".equals(conn)) {
+                            ToastUtils.showToast(MainActivity.this, conn);
+                            tvMainDeviceState.setText("未连接");
+                            btnReconn.setEnabled(true);
+                        }
                     }
+                    // 超时弹出提示
                     if (code == 3) {
                         ToastUtils.showToast(MainActivity.this, intent.getStringExtra(SocketService.EXTRA_KEY_CONN_MESS));
                     }
+                    // 获取路由云平台配置
+                    if (code == 5) {
+                        btnRouterSetting.setEnabled(true);
+                        btnCloudPlatformSetting.setEnabled(true);
+                        if (mDialog != null && mDialog.isShowing()) {
+                            mDialog.dismiss();
+                        }
+                    }
+                    // 获取登录信息，拿到设备ID
                     if (code == 4) {
                         tvMainDeviceId.setText("ID:" + intent.getStringExtra(SocketService.EXTRA_KEY_DEVICE_ID));
                         ToastUtils.showToast(MainActivity.this, intent.getStringExtra(SocketService.EXTRA_KEY_CONN_MESS));
+                        if (mDialog != null && mDialog.isShowing()) {
+                            mDialog.dismiss();
+                        }
+                        getRouterAndCloud();
+                        mDialog = new ProgressDialog(MainActivity.this);
+                        mDialog.setCancelable(false);
+                        mDialog.setMessage("获取路由云平台信息...");
+                        mDialog.show();
                     }
                 }
                 if (SocketService.ACTION_GET_DATA.equals(intent.getAction())) {
                     HashMap<String, Device> map = (HashMap<String, Device>) intent.getSerializableExtra(SocketService.EXTRA_KEY_GET_DEVICES);
-                    mDevices.addAll(map.values());
-                    mAdapter.notifyDataSetChanged();
+                    if (map.values().size() != 0) {
+                        btnWaterAll.setEnabled(true);
+                        mDevices.addAll(map.values());
+                        mAdapter.notifyDataSetChanged();
+                    }
                 }
             }
 
@@ -162,14 +212,18 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_router_setting:
-                if (mRouterPopupWindow != null) {
-                    mRouterPopupWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.TOP, 0, 0);
-                }
+                mRouterPopupWindow = new RouterPopupWindow(this, PreferencesUtil.getStringByName(this, "ssid", ""),
+                        PreferencesUtil.getStringByName(this, "password", ""));
+                Rect frame = new Rect();
+                getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
+                int statusBarHeight = frame.top;
+                mRouterPopupWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.TOP, 0, 0);
+
                 break;
             case R.id.btn_cloud_platform_setting:
-                if (mCloudPlatformPopupWindow != null) {
-                    mCloudPlatformPopupWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.TOP, 0, 0);
-                }
+                mCloudPlatformPopupWindow = new CloudPlatformPopupWindow(this, PreferencesUtil.getStringByName(this, "ip", ""),
+                        PreferencesUtil.getStringByName(this, "port", ""));
+                mCloudPlatformPopupWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.TOP, 0, 0);
                 break;
             case R.id.btn_water_all:
                 break;
@@ -180,25 +234,25 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
     }
 
     @Override
-    public void waterCondition() {
-        ConditionPopupWindow popupWindow = new ConditionPopupWindow(this);
+    public void waterCondition(String id) {
+        ConditionPopupWindow popupWindow = new ConditionPopupWindow(this, id);
         popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.TOP, 0, 0);
     }
 
     @Override
-    public void waterTiming() {
-        TimingPopupWindow popupWindow = new TimingPopupWindow(this);
+    public void waterTiming(String id) {
+        TimingPopupWindow popupWindow = new TimingPopupWindow(this, id);
         popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.TOP, 0, 0);
     }
 
     @Override
-    public void water() {
-
+    public void water(String id) {
+        mBtService.getSocketThread().send(mBtService.renderSendMess("8007" + id + "010006"));
     }
 
     @Override
-    public void pvm() {
-        PVMPopupWindow popupWindow = new PVMPopupWindow(this);
+    public void pwm(String id) {
+        PWMPopupWindow popupWindow = new PWMPopupWindow(this, id);
         popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.TOP, 0, 0);
     }
 
@@ -207,4 +261,7 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
         return mBtService;
     }
 
+    public void getRouterAndCloud() {
+        mBtService.getSocketThread().send(mBtService.renderSendMess("8004"));
+    }
 }

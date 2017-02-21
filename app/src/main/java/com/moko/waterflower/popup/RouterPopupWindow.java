@@ -77,7 +77,8 @@ public class RouterPopupWindow extends PopupWindow {
                 String password = Utils.string2HexString(etPassword.getText().toString());
                 sb.append(Utils.intToHexString(password.length() / 2, 1));
                 sb.append(password);
-                mMainActivity.getBtService().renderSendMess(sb.toString());
+                mMainActivity.getBtService().getSocketThread().send(
+                        mMainActivity.getBtService().renderSendMess(sb.toString()));
                 dismiss();
                 break;
         }

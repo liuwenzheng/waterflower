@@ -10,6 +10,7 @@
         android:id="@+id/tv_close"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
         android:drawableRight="@drawable/close"
         android:gravity="center"
         android:text="路由器配置"

@@ -1,6 +1,7 @@
 package com.moko.waterflower.popup;
 
 import android.graphics.drawable.BitmapDrawable;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -8,6 +9,8 @@ import android.widget.PopupWindow;
 
 import com.moko.waterflower.R;
 import com.moko.waterflower.activity.MainActivity;
+import com.moko.waterflower.utils.ToastUtils;
+import com.moko.waterflower.utils.Utils;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -26,16 +29,18 @@ public class TimingPopupWindow extends PopupWindow {
     EditText etTiming;
     @Bind(R.id.et_duration)
     EditText etDuration;
+    private String mId;
+    private MainActivity mMainActivity;
 
     public TimingPopupWindow(MainActivity activity) {
-        this(activity, "", "");
+        this(activity, "");
     }
 
-    public TimingPopupWindow(MainActivity activity, String timing, String duration) {
+    public TimingPopupWindow(MainActivity activity, String id) {
+        mMainActivity = activity;
+        mId = id;
         View layout = View.inflate(activity, R.layout.popup_water_timing, null);
         ButterKnife.bind(this, layout);
-        etTiming.setText(timing);
-        etDuration.setText(duration);
         setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
         setHeight(LinearLayout.LayoutParams.MATCH_PARENT);
         setFocusable(true);
@@ -56,7 +61,31 @@ public class TimingPopupWindow extends PopupWindow {
                 dismiss();
                 break;
             case R.id.btn_save:
-                // TODO: 2017/2/14 保存
+                if (TextUtils.isEmpty(etTiming.getText().toString())) {
+                    ToastUtils.showToast(mMainActivity, "请填写定时时长");
+                    return;
+                }
+                if (TextUtils.isEmpty(etDuration.getText().toString())) {
+                    ToastUtils.showToast(mMainActivity, "请填写浇水时长");
+                    return;
+                }
+                StringBuilder sb = new StringBuilder();
+                sb.append("8005");
+                sb.append(mId);
+                String time;
+                String duration;
+                if (Integer.valueOf(etTiming.getText().toString()) == 0
+                        || Integer.valueOf(etDuration.getText().toString()) == 0) {
+                    time = "FFFF";
+                    duration = "FFFF";
+                } else {
+                    time = Utils.intToHexString(Integer.valueOf(etTiming.getText().toString()), 2);
+                    duration = Utils.intToHexString(Integer.valueOf(etDuration.getText().toString()) * 2, 2);
+                }
+                sb.append(time);
+                sb.append(duration);
+                mMainActivity.getBtService().getSocketThread().send(
+                        mMainActivity.getBtService().renderSendMess(sb.toString()));
                 dismiss();
                 break;
         }

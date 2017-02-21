@@ -46,7 +46,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         initializeItemView((MyViewHolder) holder, mEntities.get(position));
     }
 
-    private void initializeItemView(MyViewHolder holder, Device device) {
+    private void initializeItemView(MyViewHolder holder, final Device device) {
         holder.tvDeviceId.setText(device.id);
         holder.tvDeviceTime.setText(device.time);
         holder.tvDevicePower.setText(String.format("%sV", device.power));
@@ -58,25 +58,25 @@ public class DeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         holder.btnWaterCondition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.waterCondition();
+                mListener.waterCondition(device.id);
             }
         });
         holder.btnWaterTiming.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.waterTiming();
+                mListener.waterTiming(device.id);
             }
         });
         holder.btnWater.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.water();
+                mListener.water(device.id);
             }
         });
-        holder.btnPvm.setOnClickListener(new View.OnClickListener() {
+        holder.btnPwm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.pvm();
+                mListener.pwm(device.id);
             }
         });
     }
@@ -109,8 +109,8 @@ public class DeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         Button btnWaterTiming;
         @Bind(R.id.btn_water)
         Button btnWater;
-        @Bind(R.id.btn_pvm)
-        Button btnPvm;
+        @Bind(R.id.btn_pwm)
+        Button btnPwm;
 
         public MyViewHolder(View itemView) {
             super(itemView);
@@ -119,12 +119,12 @@ public class DeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     public interface WaterOnClickListener {
-        void waterCondition();
+        void waterCondition(String id);
 
-        void waterTiming();
+        void waterTiming(String id);
 
-        void water();
+        void water(String id);
 
-        void pvm();
+        void pwm(String id);
     }
 }

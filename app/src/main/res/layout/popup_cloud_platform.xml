@@ -10,6 +10,7 @@
         android:id="@+id/tv_close"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
         android:drawableRight="@drawable/close"
         android:gravity="center"
         android:text="云服务器配置"
@@ -48,8 +49,8 @@
         <TextView
             android:layout_width="60dp"
             android:layout_height="wrap_content"
-            android:text="端口"
             android:inputType="number"
+            android:text="端口"
             android:textSize="20sp" />
 
         <EditText

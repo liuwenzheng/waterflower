@@ -10,9 +10,10 @@
         android:id="@+id/tv_close"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
         android:drawableRight="@drawable/close"
         android:gravity="center"
-        android:text="PVM设置"
+        android:text="PWM设置"
         android:textSize="20sp" />
 
     <LinearLayout
@@ -25,15 +26,16 @@
         <TextView
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="PVM占比"
+            android:text="PWM占比"
             android:textSize="20sp" />
 
         <EditText
-            android:id="@+id/et_pvm"
+            android:id="@+id/et_pwm"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_weight="1.0"
+            android:inputType="number"
             android:textSize="20sp" />
     </LinearLayout>
 
@@ -56,6 +58,14 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_weight="1.0"
+            android:inputType="number"
+            android:textSize="20sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="s"
             android:textSize="20sp" />
     </LinearLayout>
 

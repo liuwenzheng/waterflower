@@ -8,11 +8,12 @@ import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils;
 
-import com.elvishew.xlog.LogUtils;
 import com.moko.waterflower.base.BaseHandler;
 import com.moko.waterflower.entity.Device;
 import com.moko.waterflower.module.LogModule;
 import com.moko.waterflower.module.MessModule;
+import com.moko.waterflower.utils.PreferencesUtil;
+import com.moko.waterflower.utils.Utils;
 
 import java.util.HashMap;
 
@@ -26,6 +27,7 @@ public class SocketService extends Service {
     public static final String MESS_HEADER_LOGIN = "0002";
     public static final String MESS_HEADER_DEVICES = "0003";
     public static final String MESS_HEADER_ACK = "0001";
+    public static final String MESS_HEADER_ROUTER_CLOUD = "0004";
 
 
     private Handler mInHandle;
@@ -121,6 +123,26 @@ public class SocketService extends Service {
                             e.printStackTrace();
                             service.getSocketThread().send(service.renderSendMess("8001" + header + "01"));
                         }
+                    }
+                    if (MESS_HEADER_ROUTER_CLOUD.equals(header)) {
+                        int ipLength = Integer.parseInt(mess.substring(24, 26), 16) * 2;
+                        String ip = Utils.hexString2String(mess.substring(26, 26 + ipLength));
+                        LogModule.i(ip);
+                        int port = Integer.parseInt(mess.substring(26 + ipLength, 30 + ipLength), 16);
+                        LogModule.i(port + "");
+                        int ssidLength = Integer.parseInt(mess.substring(30 + ipLength, 32 + ipLength), 16) * 2;
+                        String ssid = Utils.hexString2String(mess.substring(32 + ipLength, 32 + ipLength + ssidLength));
+                        LogModule.i(ssid);
+                        int passwordLength = Integer.parseInt(mess.substring(32 + ipLength + ssidLength, 34 + ipLength + ssidLength), 16) * 2;
+                        String password = Utils.hexString2String(mess.substring(34 + ipLength + ssidLength, 34 + ipLength + ssidLength + passwordLength));
+                        LogModule.i(password);
+                        PreferencesUtil.setStringByName(service, "ip", ip);
+                        PreferencesUtil.setStringByName(service, "port", port + "");
+                        PreferencesUtil.setStringByName(service, "ssid", ssid);
+                        PreferencesUtil.setStringByName(service, "password", password);
+                        Intent intent = new Intent(ACTION_CONN_STATE);
+                        intent.putExtra(EXTRA_KEY_SEND_CODE, 5);
+                        service.sendBroadcast(intent);
                     }
                     if (MESS_HEADER_ACK.equals(header)) {
                         String result = mess.substring(28, 30);
