@@ -2,6 +2,7 @@ package com.moko.waterflower.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,12 +50,12 @@ public class DeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void initializeItemView(MyViewHolder holder, final Device device) {
         holder.tvDeviceId.setText(device.id);
         holder.tvDeviceTime.setText(device.time);
-        holder.tvDevicePower.setText(String.format("%sV", device.power));
-        holder.tvEnvHumidity.setText(String.format("环境湿度：%s", device.envHumidity + "%"));
-        holder.tvSoilHumidity.setText(String.format("土壤湿度：%s", device.soilHumidity + "%"));
-        holder.tvEnvTemp.setText(String.format("环境温度：%s℃", device.envTemp));
-        holder.tvWater.setText(String.format("水量：%s", device.water + "%"));
-        holder.tvDeviceLight.setText(String.format(" 光照：%slx", device.light));
+        holder.tvDevicePower.setText(String.format("%sV", TextUtils.isEmpty(device.power) ? 0 : device.power));
+        holder.tvEnvHumidity.setText(String.format("环境湿度：%s", (TextUtils.isEmpty(device.envHumidity) ? 0 : device.envHumidity) + "%"));
+        holder.tvSoilHumidity.setText(String.format("土壤湿度：%s", (TextUtils.isEmpty(device.soilHumidity) ? 0 : device.soilHumidity) + "%"));
+        holder.tvEnvTemp.setText(String.format("环境温度：%s℃", (TextUtils.isEmpty(device.envTemp) ? 0 : device.envTemp)));
+        holder.tvWater.setText(String.format("水量：%s", (TextUtils.isEmpty(device.water) ? 0 : device.water) + "%"));
+        holder.tvDeviceLight.setText(String.format(" 光照：%slx", (TextUtils.isEmpty(device.light) ? 0 : device.light)));
         holder.btnWaterCondition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -18,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -162,25 +162,24 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
                     }
                     // 获取登录信息，拿到设备ID
                     if (code == 4) {
-                        tvMainDeviceId.setText("ID:" + intent.getStringExtra(SocketService.EXTRA_KEY_DEVICE_ID));
-                        ToastUtils.showToast(MainActivity.this, intent.getStringExtra(SocketService.EXTRA_KEY_CONN_MESS));
                         if (mDialog != null && mDialog.isShowing()) {
                             mDialog.dismiss();
                         }
-                        getRouterAndCloud();
-                        mDialog = new ProgressDialog(MainActivity.this);
-                        mDialog.setCancelable(false);
-                        mDialog.setMessage("获取路由云平台信息...");
-                        mDialog.show();
+                        if (!TextUtils.isEmpty(tvMainDeviceId.getText().toString())) {
+                            return;
+                        }
+                        tvMainDeviceId.setText("ID:" + intent.getStringExtra(SocketService.EXTRA_KEY_DEVICE_ID));
                     }
                 }
                 if (SocketService.ACTION_GET_DATA.equals(intent.getAction())) {
                     HashMap<String, Device> map = (HashMap<String, Device>) intent.getSerializableExtra(SocketService.EXTRA_KEY_GET_DEVICES);
                     if (map.values().size() != 0) {
+                        mDevices.clear();
                         btnWaterAll.setEnabled(true);
                         mDevices.addAll(map.values());
                         mAdapter.notifyDataSetChanged();
                     }
+
                 }
             }
 
@@ -208,15 +207,12 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
         super.onDestroy();
     }
 
-    @OnClick({R.id.btn_router_setting, R.id.btn_cloud_platform_setting, R.id.btn_water_all, R.id.btn_reconn})
+    @OnClick({R.id.btn_router_setting, R.id.btn_cloud_platform_setting, R.id.btn_water_all, R.id.btn_reconn, R.id.btn_router})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_router_setting:
                 mRouterPopupWindow = new RouterPopupWindow(this, PreferencesUtil.getStringByName(this, "ssid", ""),
                         PreferencesUtil.getStringByName(this, "password", ""));
-                Rect frame = new Rect();
-                getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
-                int statusBarHeight = frame.top;
                 mRouterPopupWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.TOP, 0, 0);
 
                 break;
@@ -226,9 +222,19 @@ public class MainActivity extends Activity implements DeviceAdapter.WaterOnClick
                 mCloudPlatformPopupWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.TOP, 0, 0);
                 break;
             case R.id.btn_water_all:
+                for (int i = 0; i < mDevices.size(); i++) {
+                    water(mDevices.get(i).id);
+                }
                 break;
             case R.id.btn_reconn:
                 mBtService.reConn();
+                break;
+            case R.id.btn_router:
+                getRouterAndCloud();
+                mDialog = new ProgressDialog(MainActivity.this);
+                mDialog.setCancelable(false);
+                mDialog.setMessage("获取路由云平台信息...");
+                mDialog.show();
                 break;
         }
     }

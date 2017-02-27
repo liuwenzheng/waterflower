@@ -42,7 +42,6 @@ public class SocketService extends Service {
     public static String mMainDeviceId;
 
     public static class InHandle extends BaseHandler<SocketService> {
-        HashMap<String, String> hm = new HashMap<>();
 
         public InHandle(SocketService service) {
             super(service);
@@ -58,11 +57,6 @@ public class SocketService extends Service {
                     String mess = MessModule.transformReceivedMess(s);
                     String header = mess.substring(20, 24);
                     if (MESS_HEADER_LOGIN.equals(header)) {
-                        if (hm.get(header) == null) {
-                            hm.put(header, mess);
-                        } else {
-                            return;
-                        }
                         // 登录
                         mMainDeviceId = MessModule.getMainDeviceId(mess);
                         String resp = service.renderSendMess("8002" + MessModule.getBcdTime() + "0001");
@@ -73,11 +67,6 @@ public class SocketService extends Service {
                         service.sendBroadcast(intent);
                     }
                     if (MESS_HEADER_DEVICES.equals(header)) {
-                        if (hm.get(header) == null) {
-                            hm.put(header, mess);
-                        } else {
-                            return;
-                        }
                         try {
                             HashMap<String, Device> map = new HashMap<>();
                             // 上报数据
@@ -114,11 +103,13 @@ public class SocketService extends Service {
                                 }
                                 map.put(id, device);
                             }
-                            Intent intent = new Intent(ACTION_GET_DATA);
-                            intent.putExtra(EXTRA_KEY_GET_DEVICES, map);
-                            service.sendBroadcast(intent);
                             // 应答
                             service.getSocketThread().send(service.renderSendMess("8001" + header + "00"));
+                            if (count > 0) {
+                                Intent intent = new Intent(ACTION_GET_DATA);
+                                intent.putExtra(EXTRA_KEY_GET_DEVICES, map);
+                                service.sendBroadcast(intent);
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                             service.getSocketThread().send(service.renderSendMess("8001" + header + "01"));
