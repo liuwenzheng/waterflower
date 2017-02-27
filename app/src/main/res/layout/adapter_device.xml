@@ -13,7 +13,7 @@
             android:id="@+id/tv_device_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="123456789"
+            android:text="0"
             android:textSize="16sp" />
 
         <TextView
@@ -21,7 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="2017-06-01 09:00:00"
+            android:text=""
             android:textSize="16sp" />
 
         <TextView
@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:text="4.69V"
+            android:text="0V"
             android:textSize="16sp" />
     </RelativeLayout>
 
@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:gravity="center_horizontal"
-            android:text="环境湿度：20%"
+            android:text="环境湿度：0%"
             android:textSize="16sp" />
 
         <TextView
@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:gravity="center_horizontal"
-            android:text="土壤湿度：20%"
+            android:text="土壤湿度：0%"
             android:textSize="16sp" />
 
 
@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:gravity="center_horizontal"
-            android:text="环境温度：21℃"
+            android:text="环境温度：0℃"
             android:textSize="16sp" />
 
         <TextView
@@ -81,7 +81,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:gravity="center_horizontal"
-            android:text="水量：123456%"
+            android:text="水量：0%"
             android:textSize="16sp" />
 
         <TextView
@@ -90,7 +90,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.8"
             android:gravity="center_horizontal"
-            android:text="光照：30xl"
+            android:text="光照：0xl"
             android:textSize="16sp" />
     </LinearLayout>
 
@@ -133,7 +133,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.8"
             android:gravity="center"
-            android:text="PVM"
+            android:text="PWM"
             android:textSize="16sp" />
     </LinearLayout>
 

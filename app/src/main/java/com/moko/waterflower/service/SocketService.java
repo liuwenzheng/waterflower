@@ -15,6 +15,8 @@ import com.moko.waterflower.module.MessModule;
 import com.moko.waterflower.utils.PreferencesUtil;
 import com.moko.waterflower.utils.Utils;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 
 public class SocketService extends Service {
@@ -42,6 +44,7 @@ public class SocketService extends Service {
     public static String mMainDeviceId;
 
     public static class InHandle extends BaseHandler<SocketService> {
+        HashMap<String, Device> map = new HashMap<>();
 
         public InHandle(SocketService service) {
             super(service);
@@ -68,12 +71,15 @@ public class SocketService extends Service {
                     }
                     if (MESS_HEADER_DEVICES.equals(header)) {
                         try {
-                            HashMap<String, Device> map = new HashMap<>();
                             // 上报数据
                             int count = Integer.parseInt(mess.substring(24, 26), 16);
                             // 每组数据13byte，从26开始
                             for (int i = 26; i <= count * 26; i += 26) {
                                 String id = mess.substring(i, i + 8);
+                                if ("00000000".equals(id)) {
+                                    LogModule.i("数据异常");
+                                    continue;
+                                }
                                 Device device = map.get(id);
                                 if (device == null) {
                                     device = new Device();
@@ -85,6 +91,10 @@ public class SocketService extends Service {
                                             mess.substring(i + 14, i + 16), mess.substring(i + 16, i + 18),
                                             mess.substring(i + 18, i + 20), mess.substring(i + 20, i + 22));
                                 }
+                                if ("20FF-FF-FF FF:FF:FF".equals(device.time)) {
+                                    LogModule.i("数据异常");
+                                    continue;
+                                }
                                 if ("02".equals(mess.substring(i + 8, i + 10))) {
                                     device.envTemp = Integer.toString(Integer.parseInt(mess.substring(i + 22, i + 24), 16));
                                     device.envHumidity = Integer.toString(Integer.parseInt(mess.substring(i + 24, i + 26), 16));
@@ -93,7 +103,8 @@ public class SocketService extends Service {
                                     device.light = Integer.toString(Integer.parseInt(mess.substring(i + 22, i + 26), 16));
                                 }
                                 if ("04".equals(mess.substring(i + 8, i + 10))) {
-                                    device.power = Double.toString(Integer.parseInt(mess.substring(i + 22, i + 26), 16) * 0.01);
+                                    DecimalFormat df = new DecimalFormat("#.00");
+                                    device.power = df.format(Integer.parseInt(mess.substring(i + 22, i + 26), 16) * 0.01);
                                 }
                                 if ("05".equals(mess.substring(i + 8, i + 10))) {
                                     device.water = Integer.toString(Integer.parseInt(mess.substring(i + 22, i + 26), 16));
