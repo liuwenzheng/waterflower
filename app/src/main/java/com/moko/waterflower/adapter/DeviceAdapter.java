@@ -51,10 +51,9 @@ public class DeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         holder.tvDeviceId.setText(device.id);
         holder.tvDeviceTime.setText(device.time);
         holder.tvDevicePower.setText(String.format("%sV", TextUtils.isEmpty(device.power) ? 0 : device.power));
-        holder.tvEnvHumidity.setText(String.format("环境湿度：%s", (TextUtils.isEmpty(device.envHumidity) ? 0 : device.envHumidity) + "%"));
-        holder.tvSoilHumidity.setText(String.format("土壤湿度：%s", (TextUtils.isEmpty(device.soilHumidity) ? 0 : device.soilHumidity) + "%"));
-        holder.tvEnvTemp.setText(String.format("环境温度：%s℃", (TextUtils.isEmpty(device.envTemp) ? 0 : device.envTemp)));
-        holder.tvWater.setText(String.format("水量：%s", (TextUtils.isEmpty(device.water) ? 0 : device.water) + "%"));
+        holder.tvSoilHumidity.setText(String.format("土壤湿度：%s", TextUtils.isEmpty(device.soilHumidity) ? 0 : device.soilHumidity));
+        holder.tvEnvTemp.setText(String.format("环境温度：%s℃", TextUtils.isEmpty(device.envTemp) ? 0 : device.envTemp));
+        holder.tvWater.setText(String.format("水量：%s", TextUtils.isEmpty(device.water) ? 0 : device.water));
         holder.tvDeviceLight.setText(String.format(" 光照：%slx", (TextUtils.isEmpty(device.light) ? 0 : device.light)));
         holder.btnWaterCondition.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,8 +93,6 @@ public class DeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         TextView tvDeviceTime;
         @Bind(R.id.tv_device_power)
         TextView tvDevicePower;
-        @Bind(R.id.tv_env_humidity)
-        TextView tvEnvHumidity;
         @Bind(R.id.tv_soil_humidity)
         TextView tvSoilHumidity;
         @Bind(R.id.tv_env_temp)

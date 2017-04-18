@@ -7,6 +7,7 @@ import android.os.Environment;
 import com.elvishew.xlog.LogConfiguration;
 import com.elvishew.xlog.LogLevel;
 import com.elvishew.xlog.XLog;
+import com.elvishew.xlog.flattener.PatternFlattener;
 import com.elvishew.xlog.printer.AndroidPrinter;
 import com.elvishew.xlog.printer.Printer;
 import com.elvishew.xlog.printer.file.FilePrinter;
@@ -30,9 +31,13 @@ public class BaseApplication extends Application {
         }
         Printer filePrinter = new FilePrinter.Builder(PATH_LOGCAT)
                 .fileNameGenerator(new DateFileNameGenerator())
+                .logFlattener(new PatternFlattener("{d yyyy-MM-dd HH:mm:ss} {l}/{t}: {m}"))
                 .build();
-        LogConfiguration config = new LogConfiguration.Builder().tag("waterFlower").build();
-        XLog.init(BuildConfig.DEBUG ? LogLevel.ALL : LogLevel.NONE, config, new AndroidPrinter(), filePrinter);
+        LogConfiguration config = new LogConfiguration.Builder()
+                .tag("waterFlower")
+                .logLevel(BuildConfig.DEBUG ? LogLevel.ALL : LogLevel.NONE)
+                .build();
+        XLog.init(config, new AndroidPrinter(), filePrinter);
         // 启动蓝牙服务
         startService(new Intent(this, SocketService.class));
     }

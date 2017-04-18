@@ -59,27 +59,25 @@ public class MessModule {
         mess = mess.toUpperCase();
         if (!TextUtils.isEmpty(mess) && mess.startsWith("7E") && mess.endsWith("7E")) {
             String body = mess.substring(2, mess.length() - 2);
-            int c = -1;
-            for (int i = 0; i < body.length(); i++) {
+            int c1 = -1;
+            int c2 = -1;
+            for (int i = 0; i < body.length() - 2; i++) {
                 String a = body.substring(i, i + 2);
                 if ("7D".equals(a)) {
                     String b = body.substring(i + 2, i + 4);
                     if ("01".equals(b)) {
-                        c = 1;
-                        break;
+                        c1 = 1;
                     }
                     if ("02".equals(b)) {
-                        c = 2;
-                        break;
+                        c2 = 2;
                     }
-                } else {
-                    i++;
                 }
+                i++;
             }
-            if (c == 1) {
+            if (c1 == 1) {
                 body = body.replaceAll("7D01", "7E");
             }
-            if (c == 2) {
+            if (c2 == 2) {
                 body = body.replaceAll("7D02", "7D");
             }
             mess = "7E" + body + "7E";
